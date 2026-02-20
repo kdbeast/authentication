@@ -7,7 +7,11 @@ import sendMail from "../config/sendMail.config.js";
 import tryCatch from "../middleware/tryCatch.middleware.js";
 import { getOtpHtml, getVerifyEmailHtml } from "../config/html.config.js";
 import { loginSchema, registerSchema } from "../config/zod.config.js";
-import { generateToken } from "../config/generateToken.config.js";
+import {
+  generateAccessToken,
+  generateToken,
+  verifyRefreshToken,
+} from "../config/generateToken.config.js";
 
 export const registerUser = tryCatch(async (req, res) => {
   const sanitizedBody = sanitize(req.body);
@@ -206,5 +210,33 @@ export const verifyOtp = tryCatch(async (req, res) => {
   return res.status(200).json({
     message: `Welcome ${user.username}`,
     user,
+  });
+});
+
+export const myProfile = tryCatch(async (req, res) => {
+  const user = req.user;
+  return res.status(200).json({
+    message: "Profile fetched successfully",
+    user,
+  });
+});
+
+export const refreshToken = tryCatch(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
+
+  const decode = await verifyRefreshToken(refreshToken);
+  if (!decode) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
+  generateAccessToken(decode.id, res);
+  return res.status(200).json({
+    message: "Token refreshed successfully",
   });
 });

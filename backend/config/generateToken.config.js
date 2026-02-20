@@ -29,3 +29,38 @@ export const generateToken = async (id, res) => {
 
   return { accessToken, refreshToken };
 };
+
+export const verifyRefreshToken = async (refreshToken) => {
+  try {
+    const decodedToken = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+
+    const storedRefreshToken = await redisClient.get(
+      `refresh_token:${decodedToken.id}`,
+    );
+
+    if (storedRefreshToken === refreshToken) {
+      return decodedToken;
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const generateAccessToken = (id, res) => {
+  const accessToken = jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1m",
+  });
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    // secure: true,
+    sameSite: "strict",
+    maxAge: 1 * 60 * 1000,
+  });
+
+  return accessToken;
+};

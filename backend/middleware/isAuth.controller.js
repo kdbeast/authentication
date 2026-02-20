@@ -5,7 +5,6 @@ import User from "../models/user.model.js";
 export const isAuth = async (req, res, next) => {
   try {
     const token = req.cookies.accessToken;
-
     if (!token) {
       return res.status(403).json({
         message: "Unauthorized",
