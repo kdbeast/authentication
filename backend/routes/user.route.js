@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  logout,
   verifyOtp,
   loginUser,
   myProfile,
@@ -19,5 +20,6 @@ router.post("/verify", verifyOtp);
 
 router.get("/me", isAuth, myProfile);
 router.post("/refresh", refreshToken);
+router.post("/logout", isAuth, logout);
 
 export default router;

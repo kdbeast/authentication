@@ -10,6 +10,7 @@ import { loginSchema, registerSchema } from "../config/zod.config.js";
 import {
   generateAccessToken,
   generateToken,
+  revokeRefreshToken,
   verifyRefreshToken,
 } from "../config/generateToken.config.js";
 
@@ -238,5 +239,20 @@ export const refreshToken = tryCatch(async (req, res) => {
   generateAccessToken(decode.id, res);
   return res.status(200).json({
     message: "Token refreshed successfully",
+  });
+});
+
+export const logout = tryCatch(async (req, res) => {
+  const userId = req.user._id;
+
+  await revokeRefreshToken(userId);
+
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+
+  await redisClient.del(`user:${userId}`);
+
+  return res.status(200).json({
+    message: "Logout successful",
   });
 });

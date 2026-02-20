@@ -64,3 +64,7 @@ export const generateAccessToken = (id, res) => {
 
   return accessToken;
 };
+
+export const revokeRefreshToken = async (userId) => {
+  await redisClient.del(`refresh_token:${userId}`);
+};
