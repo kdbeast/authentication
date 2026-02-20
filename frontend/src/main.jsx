@@ -1,10 +1,20 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import "./index.css";
+import App from "./App.jsx";
+import { StrictMode } from "react";
+import { BrowserRouter } from "react-router";
+import { createRoot } from "react-dom/client";
+import { ToastContainer } from "react-toastify";
+import { AppProvider } from "./context/appContext";
 
-createRoot(document.getElementById('root')).render(
+export const server = "http://localhost:8000";
+
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <AppProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </AppProvider>
+    <ToastContainer position="top-center" />
   </StrictMode>,
-)
+);
