@@ -1,8 +1,9 @@
-import axios from "axios";
-import { server } from "../main";
+import api from "../apiIntercepter";
+
 import { useContext } from "react";
 import { toast } from "react-toastify";
 import { createContext, useEffect, useState } from "react";
+
 const AppContext = createContext(null);
 
 const AppProvider = ({ children }) => {
@@ -16,9 +17,7 @@ const AppProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get(`${server}/api/v1/me`, {
-        withCredentials: true,
-      });
+      const { data } = await api.get("/api/v1/me");
       setUser(data);
       setIsAuth(true);
       setLoading(false);
