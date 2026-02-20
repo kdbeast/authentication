@@ -1,7 +1,12 @@
-import User from "../models/user.model.js";
-import tryCatch from "../middleware/tryCatch.middleware.js";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 import sanitize from "mongo-sanitize";
+import { redisClient } from "../index.js";
+import User from "../models/user.model.js";
 import { registerSchema } from "../config/zod.config.js";
+import tryCatch from "../middleware/tryCatch.middleware.js";
+import { getVerifyEmailHtml } from "../config/html.config.js";
+import sendMail from "../config/sendMail.config.js";
 
 export const registerUser = tryCatch(async (req, res) => {
   const sanitizedBody = sanitize(req.body);
@@ -16,16 +21,46 @@ export const registerUser = tryCatch(async (req, res) => {
 
   const { username, email, password } = validation.data;
 
-  //   const user = await User.create({
-  //     username,
-  //     email,
-  //     password,
-  //   });
+  const rateLimitKey = `register-rate-limit:${req.ip}:${email}`;
 
-  return res.status(201).json({
-    message: "User registered successfully",
+  if (await redisClient.get(rateLimitKey)) {
+    return res.status(429).json({
+      message: "Too many requests, try again later",
+    });
+  }
+
+  const existingUser = await User.findOne({ email });
+
+  if (existingUser) {
+    return res.status(400).json({
+      message: "User already exists",
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const verifyToken = crypto.randomBytes(32).toString("hex");
+
+  const verifyKey = `verify:${verifyToken}`;
+
+  const dataToStore = {
     username,
     email,
-    password,
+    password: hashedPassword,
+  };
+
+  await redisClient.set(verifyKey, JSON.stringify(dataToStore), { EX: 300 });
+
+  const subject = "Verify your email for account creation";
+  const html = getVerifyEmailHtml({ email, verifyToken });
+
+  await sendMail({ email, subject, html });
+
+  await redisClient.set(rateLimitKey, "true", { EX: 60 });
+
+  return res.status(201).json({
+    message:
+      "If your email is valid you will receive an email to verify your account. It will expire in 5 minutes"
   });
 });
+
