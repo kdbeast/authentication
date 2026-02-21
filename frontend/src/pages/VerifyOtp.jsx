@@ -2,11 +2,14 @@ import axios from "axios";
 import { useState } from "react";
 import { server } from "../main";
 import { toast } from "react-toastify";
-import { Link } from "react-router";
+import { AppData } from "../context/appContext";
+import { Link, useNavigate } from "react-router";
 
 const VerifyOtp = () => {
+  const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const { setIsAuth, setUser } = AppData();
 
   const email = localStorage.getItem("email");
 
@@ -24,6 +27,9 @@ const VerifyOtp = () => {
       );
       toast.success(data.message);
       localStorage.clear("email");
+      setIsAuth(true);
+      setUser(data.user);
+      navigate("/");
     } catch (error) {
       toast.error(error.response.data.message[0]);
     } finally {
@@ -72,10 +78,8 @@ const VerifyOtp = () => {
             {loading ? "Verifying..." : "Verify"}
           </button>
           <Link to="/login" className="text-xs text-gray-500 mt-3">
-            Go back to {" "}
-            <span className="text-indigo-500 hover:text-indigo-600">
-              Login
-            </span>
+            Go back to{" "}
+            <span className="text-indigo-500 hover:text-indigo-600">Login</span>
           </Link>
         </form>
       </div>

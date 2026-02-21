@@ -28,9 +28,21 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    try {
+      await api.post("/api/v1/logout");
+      setUser(null);
+      setIsAuth(false);
+      toast.success("Logout successful");
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log(error.response.data);
+    }
+  };
+
   return (
     <AppContext.Provider
-      value={{ user, isAuth, loading, fetchUser, setIsAuth }}
+      value={{ user, isAuth, loading, fetchUser, setIsAuth, logout }}
     >
       {children}
     </AppContext.Provider>
