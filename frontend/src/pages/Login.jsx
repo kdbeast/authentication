@@ -23,7 +23,7 @@ const Login = () => {
       navigate("/verifyotp");
       setLoading(false);
     } catch (error) {
-      toast.error(error.response.data.message[0]);
+      toast.error(error.response.data.message);
     } finally {
       setLoading(false);
     }

@@ -11,10 +11,6 @@ const AppProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
   const fetchUser = async () => {
     try {
       const { data } = await api.get("/api/v1/me");
@@ -22,12 +18,19 @@ const AppProvider = ({ children }) => {
       setIsAuth(true);
       setLoading(false);
     } catch (error) {
-      toast.error(error.response.data.message[0]);
+      const status = error?.response?.status;
+      if (status !== 401 && status !== 403) {
+        toast.error(error?.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
+  
   const logout = async () => {
     try {
       await api.post("/api/v1/logout");

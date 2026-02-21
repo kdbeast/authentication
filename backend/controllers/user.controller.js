@@ -19,9 +19,11 @@ export const registerUser = tryCatch(async (req, res) => {
   const validation = registerSchema.safeParse(sanitizedBody);
 
   if (!validation.success) {
-    const errorMessages = validation.error.issues.map((issue) => issue.message);
+    const errorMessage = validation.error.issues
+      .map((issue) => issue.message)
+      .join(", ");
     return res.status(400).json({
-      message: errorMessages,
+      message: errorMessage,
     });
   }
 
@@ -120,9 +122,11 @@ export const loginUser = tryCatch(async (req, res) => {
   const validation = loginSchema.safeParse(sanitizedBody);
 
   if (!validation.success) {
-    const errorMessages = validation.error.issues.map((issue) => issue.message);
+    const errorMessage = validation.error.issues
+      .map((issue) => issue.message)
+      .join(", ");
     return res.status(400).json({
-      message: errorMessages,
+      message: errorMessage,
     });
   }
 
